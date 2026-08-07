@@ -1,0 +1,34 @@
+# Archivos y carpetas que NO deben incluirse en el paquete de distribución
+# (WordPress.org). Usar con `wp dist-archive` o equivalente al empaquetar.
+
+# Control de versiones
+.git
+.gitignore
+.gitattributes
+
+# Documentación e instrucciones de desarrollo (IA)
+.claude
+CLAUDE.md
+TASKS.md
+
+# Configuración del editor (solo desarrollo)
+.vscode
+
+# Traducción de referencia del readme (WordPress.org no la lee; se usa como
+# fuente al traducir en translate.wordpress.org)
+readme-es_CL.txt
+
+# Exports de traducción descargados de translate.wordpress.org (no son los .mo
+# que carga WordPress; el plugin no declara i18n). Solo referencia local.
+wp-plugins-*.po
+
+# Empaquetado
+.distignore
+*.zip
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Dependencias de desarrollo
+node_modules

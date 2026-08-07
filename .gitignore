@@ -1,0 +1,20 @@
+# Paquetes de distribución generados al empaquetar
+*.zip
+
+# Configuración local del editor
+.vscode/
+
+# Configuración local de Claude Code (no es parte del plugin)
+.claude/
+
+# Exports de traducción de translate.wordpress.org (regenerable)
+wp-plugins-*.po
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Archivos internos de desarrollo - estrategia de negocio, no van al repo público
+CLAUDE.md
+TASKS.md
