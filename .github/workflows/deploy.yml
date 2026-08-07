@@ -1,6 +1,6 @@
 name: Deploy to WordPress.org
 
-on:
+"on":
   release:
     types: [published]
 
@@ -17,7 +17,7 @@ jobs:
         uses: 10up/action-wordpress-plugin-deploy@stable
         with:
           generate-zip: true
-          dry-run: true  # <-- MODO DE PRUEBA: no publica nada real, quitar esta línea después
+          dry-run: true
         env:
           SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
           SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
