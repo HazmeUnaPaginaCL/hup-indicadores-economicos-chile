@@ -2,7 +2,7 @@
 Contributors: hazmeunapagina
 Tags: chile, currency, exchange rate, uf, economy
 Requires at least: 6.0
-Tested up to: 7.0
+Tested up to: 7.1
 Requires PHP: 7.4
 Stable tag: 1.2.0
 License: GPLv2 or later
@@ -109,7 +109,7 @@ Configurable per indicator from the admin screen (0 to 4 decimals).
 == Changelog ==
 
 = 1.2.0 =
-* Redesigned the admin screen with HUP Admin UI 1.1.0: shared header, navigation, cards, controls and responsive layout.
+* Redesigned the admin screen with the shared HUP admin design: header, navigation, cards, controls and responsive layout.
 * Added a guide for shortcode use, CSS classes and data source information.
 * Moved settings to a dedicated admin menu; old Tools links redirect to the new location.
 * Added confirmation before clearing the cache and clarified how background updates work.

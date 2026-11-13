@@ -1,0 +1,7 @@
+# Saltos de línea LF también en Windows (core.autocrlf los cambia a CRLF al
+# sacar los archivos y el paquete armado a mano los llevaría así).
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.zip binary
+*.mo binary

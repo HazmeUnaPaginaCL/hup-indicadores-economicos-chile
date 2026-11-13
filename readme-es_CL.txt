@@ -15,7 +15,7 @@
 Contributors: hazmeunapagina
 Tags: chile, currency, exchange rate, uf, economy
 Requires at least: 6.0
-Tested up to: 7.0
+Tested up to: 7.1
 Requires PHP: 7.4
 Stable tag: 1.2.0
 License: GPLv2 or later
@@ -122,7 +122,7 @@ Configurable por indicador desde el panel de administración (0 a 4 decimales).
 == Changelog ==
 
 = 1.2.0 =
-* Panel rediseñado con HUP Admin UI 1.1.0: encabezado, navegación, tarjetas, controles y diseño adaptable.
+* Panel rediseñado con el diseño de administración común de HUP: encabezado, navegación, tarjetas, controles y diseño adaptable.
 * Nueva guía de uso del shortcode, clases CSS y fuente de datos.
 * Configuración trasladada a un menú de administración propio; los enlaces anteriores desde Herramientas redirigen al nuevo.
 * Confirmación antes de limpiar la caché y explicación más clara de las actualizaciones en segundo plano.

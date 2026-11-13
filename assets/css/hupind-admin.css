@@ -56,3 +56,19 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* En la columna angosta el shortcode va arriba y el botón debajo, y se corta
+   entre atributos en vez de partir las palabras (hup-code usa break-all). */
+.hup-app .hupind-shortcode-code {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.hup-app .hupind-shortcode-code code {
+  word-break: normal;
+  overflow-wrap: anywhere;
+}
+
+.hup-app .hupind-shortcode-code .hup-btn {
+  align-self: flex-start;
+}

@@ -3,6 +3,12 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
 class HUPIND_Admin {
 
+    /** Versión de hup-ui copiada en hup-ui/ (sistema de diseño HUP). */
+    const UI_VERSION = '1.3.0';
+
+    /** Color propio del plugin: solo el ícono del header. */
+    const COLOR = '#15803d';
+
     private string $page_hook = '';
 
     public function __construct() {
@@ -61,13 +67,13 @@ class HUPIND_Admin {
             'hup-ui-tokens-hupind',
             HUPIND_URL . 'hup-ui/tokens.css',
             [],
-            '1.1.0'
+            self::UI_VERSION
         );
         wp_enqueue_style(
             'hup-ui-hupind',
             HUPIND_URL . 'hup-ui/hup-admin.css',
             [ 'hup-ui-tokens-hupind' ],
-            '1.1.0'
+            self::UI_VERSION
         );
         wp_enqueue_style(
             'hupind-admin',
@@ -79,7 +85,7 @@ class HUPIND_Admin {
             'hup-ui-hupind',
             HUPIND_URL . 'hup-ui/hup-admin.js',
             [],
-            '1.1.0',
+            self::UI_VERSION,
             true
         );
 

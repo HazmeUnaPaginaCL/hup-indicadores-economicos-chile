@@ -8,7 +8,7 @@ $hupind_sections    = $hupind_sections ?? [];
 <div class="wrap">
   <h1 class="screen-reader-text">HUP - Indicadores Económicos (Chile)</h1>
 
-  <div class="hup-app" style="--hup-plugin:#2271b1">
+  <div class="hup-app" style="--hup-plugin:<?php echo esc_attr( HUPIND_Admin::COLOR ); ?>">
     <header class="hup-header">
       <div class="hup-header__icon">
         <span class="dashicons dashicons-chart-line" aria-hidden="true"></span>

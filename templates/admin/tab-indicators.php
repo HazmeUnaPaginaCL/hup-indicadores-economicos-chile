@@ -157,7 +157,7 @@ $hupind_saved = isset( $_GET['saved'] ) && is_string( $_GET['saved'] ) && '1' ==
         <h3 class="hup-card__title" id="hupind-shortcode-title">Shortcode generado</h3>
       </div>
       <div class="hup-card__body">
-        <div class="hup-code">
+        <div class="hup-code hupind-shortcode-code">
           <code id="hupind-sc-preview">[hupind_indicadores]</code>
           <button type="button" class="hup-btn hup-btn--sm" id="hupind-copy-btn" data-hup-copy="#hupind-sc-preview">
             <span class="dashicons dashicons-admin-page" aria-hidden="true"></span>
