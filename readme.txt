@@ -4,7 +4,7 @@ Tags: chile, currency, exchange rate, uf, economy
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.1.1
+Stable tag: 1.2.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -24,7 +24,7 @@ This project is independent and is not affiliated with any government entity. Da
 * 12 indicators: UF, UTM, Dollar, Euro, IPC, IVP, IMACEC, TPM, Copper Pound, Unemployment Rate, Bitcoin and Exchange Dollar
 * Customs Dollar (Dólar Aduanero) for imports/exports — derived from the observed dollar (the value of the second-to-last business day of the previous month, the same rule used by the National Customs Service)
 * `[hupind_indicadores]` shortcode with multiple configurable parameters
-* Admin screen under **Tools** — indicator selection and shortcode builder on a single page
+* Dedicated admin menu — indicator selection, live shortcode builder, cache settings and usage guide
 * Automatic format per indicator type: `$` (CLP), `US$` (USD) or `%` (percentage)
 * Change versus the previous day: `%` for prices/currencies, percentage points (`pp`) for rates and indices
 * ▲ green / ▼ red arrows for positive/negative change
@@ -58,14 +58,14 @@ This plugin connects to the public mindicador.cl API to retrieve the current val
 
 * Service: mindicador.cl — https://mindicador.cl
 * What is sent: nothing. The plugin only performs read (GET) requests to retrieve indicator values; no personal or site data is transmitted.
-* When: when the shortcode is rendered and the cache has expired (cache duration is configurable, default 1 hour).
+* When: during background refreshes with WP-Cron at the configured interval (1 hour by default), and on an initial request if no cached value exists.
 * Terms / privacy: https://mindicador.cl
 
 == Installation ==
 
 1. Upload the `hup-indicadores-economicos-chile` folder to the `/wp-content/plugins/` directory.
 2. Activate the plugin from the **Plugins** menu in WordPress.
-3. Go to **Tools → HUP Indicadores** in the WordPress admin.
+3. Open **HUP - Indicadores Económicos** in the WordPress admin.
 4. Enable the indicators you want to show and adjust the decimals.
 5. Copy the automatically generated shortcode and paste it wherever you need it.
 
@@ -101,11 +101,18 @@ Configurable per indicator from the admin screen (0 to 4 decimals).
 
 == Screenshots ==
 
-1. Admin screen — indicator selection with toggles and decimal configuration.
-2. Shortcode options with live builder, date format and BEM class reference in an accordion.
-3. Cache screen with last fetch statistics and configurable duration.
+1. Indicators screen — selection with toggles, decimal configuration and live shortcode builder.
+2. Shortcode options and copy button in the HUP admin design.
+3. Cache screen — last successful update, duration and cache clearing.
+4. Guide screen — setup steps, BEM classes and data source.
 
 == Changelog ==
+
+= 1.2.0 =
+* Redesigned the admin screen with HUP Admin UI 1.1.0: shared header, navigation, cards, controls and responsive layout.
+* Added a guide for shortcode use, CSS classes and data source information.
+* Moved settings to a dedicated admin menu; old Tools links redirect to the new location.
+* Added confirmation before clearing the cache and clarified how background updates work.
 
 = 1.1.1 =
 * Added a space between the indicator name, its value and the change (e.g. "UF $38.123,45 ▲ 0,12%") for better readability. Visual only; no behavior changes.
@@ -131,6 +138,9 @@ Configurable per indicator from the admin screen (0 to 4 decimals).
 * No CSS on the frontend — BEM design ready to style. Compatible with Bricks Builder and Elementor.
 
 == Upgrade Notice ==
+
+= 1.2.0 =
+The settings page now appears in its own HUP - Indicadores Económicos admin menu. Existing Tools links redirect automatically.
 
 = 1.1.1 =
 Adds spacing between the indicator name, value and change for better readability. Visual only.

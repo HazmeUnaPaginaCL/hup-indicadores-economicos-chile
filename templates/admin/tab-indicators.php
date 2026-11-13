@@ -4,7 +4,6 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 $hupind_indicators = get_option( 'hupind_indicators', HUPIND_Core::$indicators_default );
 usort( $hupind_indicators, fn( $a, $b ) => ( $a['order'] ?? 0 ) <=> ( $b['order'] ?? 0 ) );
 
-// ¿Está activo el Dólar Aduanero? Determina el estado inicial de su nota explicativa.
 $hupind_aduanero_on = false;
 foreach ( $hupind_indicators as $hupind_ind ) {
     if ( 'dolar_aduanero' === $hupind_ind['id'] ) {
@@ -12,170 +11,136 @@ foreach ( $hupind_indicators as $hupind_ind ) {
         break;
     }
 }
+
+// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Solo muestra la confirmación después de un guardado validado.
+$hupind_saved = isset( $_GET['saved'] ) && is_string( $_GET['saved'] ) && '1' === sanitize_key( wp_unslash( $_GET['saved'] ) );
 ?>
+<div class="hup-grid hup-grid--aside">
+  <form class="hup-card" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+    <?php wp_nonce_field( 'hupind_save' ); ?>
+    <input type="hidden" name="action" value="hupind_save">
+    <input type="hidden" name="_tab" value="indicators">
 
-<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
-  <?php wp_nonce_field( 'hupind_save' ); ?>
-  <input type="hidden" name="action" value="hupind_save">
-  <input type="hidden" name="_tab" value="indicators">
-
-  <div class="hupind-builder-layout">
-
-    <!-- Columna izquierda: indicadores + clases BEM -->
-    <div class="hupind-left-col">
-
-      <div class="hupind-card">
-
-        <div class="hupind-card__header">
-          <h2 class="hupind-card__title">Indicadores</h2>
-          <span style="font-size:12px;color:var(--hupind-sidebar-text);">Activa los que quieres mostrar</span>
-        </div>
-
-        <div class="hupind-indicators-grid">
-          <?php foreach ( $hupind_indicators as $hupind_ind ) :
+    <div class="hup-card__head">
+      <div>
+        <h3 class="hup-card__title">Indicadores visibles</h3>
+        <p class="hup-card__desc">Elige los indicadores y sus decimales para todo el sitio.</p>
+      </div>
+    </div>
+    <div class="hup-card__body">
+      <div class="hupind-indicators-grid">
+        <?php foreach ( $hupind_indicators as $hupind_ind ) :
             $hupind_id       = $hupind_ind['id'];
             $hupind_label    = $hupind_ind['label'];
             $hupind_enabled  = ! empty( $hupind_ind['enabled'] );
             $hupind_decimals = isset( $hupind_ind['decimals'] ) ? (int) $hupind_ind['decimals'] : 2;
-          ?>
-          <div class="hupind-indicator-item <?php echo $hupind_enabled ? 'is-active' : ''; ?>"
-               data-indicator-id="<?php echo esc_attr( $hupind_id ); ?>">
-
-            <label class="hupind-indicator-item__toggle">
+            ?>
+          <div class="hup-row hupind-indicator-option" data-indicator-id="<?php echo esc_attr( $hupind_id ); ?>">
+            <label class="hup-toggle">
               <input type="checkbox"
+                     id="hupind-enabled-<?php echo esc_attr( $hupind_id ); ?>"
                      class="hupind-indicator-check"
                      name="hupind_indicators[<?php echo esc_attr( $hupind_id ); ?>][enabled]"
                      value="1"
                      <?php checked( $hupind_enabled ); ?>>
-              <span class="hupind-switch__track"></span>
+              <span class="hup-toggle__track" aria-hidden="true"></span>
+              <span class="screen-reader-text">Mostrar <?php echo esc_html( $hupind_label ); ?></span>
             </label>
-
-            <div class="hupind-indicator-item__info">
-              <span class="hupind-indicator-item__label"><?php echo esc_html( $hupind_label ); ?></span>
-              <code class="hupind-indicator-item__id"><?php echo esc_html( $hupind_id ); ?></code>
+            <div class="hup-row__text">
+              <div class="hup-row__title"><label for="hupind-enabled-<?php echo esc_attr( $hupind_id ); ?>"><?php echo esc_html( $hupind_label ); ?></label></div>
+              <div class="hup-row__desc"><span class="hup-tag"><?php echo esc_html( $hupind_id ); ?></span></div>
             </div>
-
-            <div class="hupind-indicator-item__decimals">
-              <label style="font-size:10px;color:var(--hupind-sidebar-text);display:block;margin-bottom:2px;">Dec.</label>
-              <input type="number"
-                     class="hupind-input hupind-input-dec"
+            <div class="hupind-indicator-option__decimals">
+              <label for="hupind-decimals-<?php echo esc_attr( $hupind_id ); ?>">Dec.</label>
+              <input id="hupind-decimals-<?php echo esc_attr( $hupind_id ); ?>"
+                     type="number"
+                     class="hup-input hup-input--sm"
                      name="hupind_indicators[<?php echo esc_attr( $hupind_id ); ?>][decimals]"
+                     aria-label="Decimales de <?php echo esc_attr( $hupind_label ); ?>"
                      value="<?php echo esc_attr( $hupind_decimals ); ?>"
-                     min="0"
-                     max="4"
-                     step="1">
-            </div>
-
-          </div>
-          <?php endforeach; ?>
-        </div>
-
-        <!-- Nota explicativa del Dólar Aduanero (visible solo cuando está activo) -->
-        <div id="hupind-aduanero-note"
-             class="hupind-aduanero-note<?php echo $hupind_aduanero_on ? '' : ' hupind-hidden'; ?>">
-          <span class="dashicons dashicons-info-outline"></span>
-          <p>
-            El <strong>Dólar Aduanero</strong> se calcula automáticamente a partir del dólar
-            observado del Banco Central: corresponde al valor del <strong>penúltimo día hábil
-            del mes anterior</strong>, la misma regla que aplica el Servicio Nacional de Aduanas
-            para el mes en curso. No se obtiene directamente desde aduana.cl.
-          </p>
-        </div>
-
-        <div class="hupind-form-actions">
-          <button type="submit" class="hupind-btn hupind-btn-primary">
-            <span class="dashicons dashicons-saved"></span>
-            Guardar cambios
-          </button>
-        </div>
-
-      </div><!-- .hupind-card -->
-
-      <!-- Referencia BEM — acordeón debajo de indicadores -->
-      <details class="hupind-accordion">
-        <summary>Clases CSS disponibles</summary>
-        <div class="hupind-accordion__body">
-          <table style="width:100%;border-collapse:collapse;font-size:12px;">
-            <tbody>
-              <?php
-              $hupind_rows = [
-                [ '.hupind-indicadores--bar',             'Layout horizontal' ],
-                [ '.hupind-indicadores--vertical',        'Layout vertical' ],
-                [ '.hupind-indicadores__item--{id}',      'Por indicador (--uf, --dolar…)' ],
-                [ '.hupind-indicadores__label',           'Nombre del indicador' ],
-                [ '.hupind-indicadores__value',           'Valor formateado' ],
-                [ '.hupind-indicadores__variation--up',   'Variación positiva' ],
-                [ '.hupind-indicadores__variation--down', 'Variación negativa' ],
-                [ '.hupind-indicadores__divider',         'Separador (horizontal)' ],
-                [ '.hupind-indicadores__updated',         'Fecha de actualización' ],
-              ];
-              foreach ( $hupind_rows as $hupind_row ) : ?>
-              <tr style="border-bottom:1px solid var(--hupind-border);">
-                <td style="padding:7px 0;">
-                  <code style="font-size:11px;background:#f0f0f1;padding:2px 5px;border-radius:3px;"><?php echo esc_html( $hupind_row[0] ); ?></code>
-                </td>
-                <td style="padding:7px 0 7px 12px;color:var(--hupind-sidebar-text);"><?php echo esc_html( $hupind_row[1] ); ?></td>
-              </tr>
-              <?php endforeach; ?>
-            </tbody>
-          </table>
-        </div>
-      </details>
-
-    </div><!-- .hupind-left-col -->
-
-    <!-- Columna derecha: opciones del shortcode -->
-    <div class="hupind-builder-options">
-
-      <div class="hupind-card">
-        <div class="hupind-card__header">
-          <h2 class="hupind-card__title">Opciones del shortcode</h2>
-        </div>
-        <div class="hupind-card__body">
-
-          <!-- Layout -->
-          <div class="hupind-form-row">
-            <span class="hupind-form-label">Disposición</span>
-            <div class="hupind-layout-options">
-              <label class="hupind-layout-option">
-                <input type="radio" name="sc_layout" value="horizontal" checked>
-                <span><span class="dashicons dashicons-minus"></span> Horizontal</span>
-              </label>
-              <label class="hupind-layout-option">
-                <input type="radio" name="sc_layout" value="vertical">
-                <span><span class="dashicons dashicons-menu-alt"></span> Vertical</span>
-              </label>
+                     min="0" max="4" step="1">
             </div>
           </div>
+        <?php endforeach; ?>
+      </div>
 
-          <!-- Separador -->
-          <div class="hupind-form-row" id="hupind-separator-row">
-            <label class="hupind-form-label" for="sc-separator">Separador</label>
-            <input type="text" id="sc-separator" name="sc_separator"
-                   class="hupind-input" value="|" maxlength="10">
+      <div id="hupind-aduanero-note" class="hup-notice"<?php echo $hupind_aduanero_on ? '' : ' hidden'; ?>>
+        <span class="dashicons dashicons-info" aria-hidden="true"></span>
+        <p>El Dólar Aduanero se calcula con el valor del penúltimo día hábil del mes anterior. <a href="<?php echo esc_url( add_query_arg( [ 'page' => 'hupind-indicadores', 'tab' => 'guide' ], admin_url( 'admin.php' ) ) ); ?>">Ver cómo se obtiene</a>.</p>
+      </div>
+    </div>
+    <div class="hup-card__foot">
+      <button type="submit" class="hup-btn">
+        <span class="dashicons dashicons-yes" aria-hidden="true"></span>Guardar cambios
+      </button>
+      <?php if ( $hupind_saved ) : ?>
+        <span class="hup-save-status"><span class="dashicons dashicons-yes-alt" aria-hidden="true"></span>Cambios guardados</span>
+      <?php endif; ?>
+    </div>
+  </form>
+
+  <div class="hup-stack">
+    <section class="hup-card" aria-labelledby="hupind-shortcode-options-title">
+      <div class="hup-card__head">
+        <div>
+          <h3 class="hup-card__title" id="hupind-shortcode-options-title">Opciones del shortcode</h3>
+          <p class="hup-card__desc">Estos ajustes modifican el código que copiarás.</p>
+        </div>
+      </div>
+      <div class="hup-card__body">
+        <div class="hup-field hup-field--stacked">
+          <span class="hup-label">Disposición</span>
+          <div class="hup-control">
+            <div class="hup-seg" role="radiogroup" aria-label="Disposición">
+              <label><input type="radio" name="sc_layout" value="horizontal" checked><span><span class="dashicons dashicons-minus" aria-hidden="true"></span>Horizontal</span></label>
+              <label><input type="radio" name="sc_layout" value="vertical"><span><span class="dashicons dashicons-menu-alt" aria-hidden="true"></span>Vertical</span></label>
+            </div>
           </div>
+        </div>
 
-          <!-- Formato -->
-          <div class="hupind-form-row">
-            <label class="hupind-form-label" for="sc-format">Formato de número</label>
-            <select id="sc-format" name="sc_format" class="hupind-select">
+        <div class="hup-field hup-field--stacked" id="hupind-separator-row">
+          <label class="hup-label" for="sc-separator">Separador</label>
+          <div class="hup-control">
+            <input type="text" id="sc-separator" class="hup-input hup-input--sm" value="|" maxlength="10">
+          </div>
+        </div>
+
+        <div class="hup-field hup-field--stacked">
+          <label class="hup-label" for="sc-format">Formato de número</label>
+          <div class="hup-control">
+            <select id="sc-format" class="hup-select">
               <option value="auto">Automático — $, US$ o %</option>
               <option value="clp">Forzar CLP — $38.245,67</option>
               <option value="raw">Sin signo — 38245,67</option>
             </select>
           </div>
+        </div>
 
-          <!-- Clase extra -->
-          <div class="hupind-form-row">
-            <label class="hupind-form-label" for="sc-class">Clase CSS adicional</label>
-            <input type="text" id="sc-class" name="sc_class"
-                   class="hupind-input" placeholder="mi-clase-extra">
+        <div class="hup-field hup-field--stacked">
+          <label class="hup-label" for="sc-class">Clase CSS adicional</label>
+          <div class="hup-control">
+            <input type="text" id="sc-class" class="hup-input hup-input--mono" placeholder="mi-clase-extra">
           </div>
+        </div>
 
-          <!-- Formato de fecha (se muestra cuando show_date está activo) -->
-          <div class="hupind-form-row" id="hupind-date-format-row" style="display:none;">
-            <label class="hupind-form-label" for="sc-date-format">Formato de la fecha</label>
-            <select id="sc-date-format" name="sc_date_format" class="hupind-select">
+        <div class="hup-field hup-field--stacked">
+          <span class="hup-label">Datos adicionales</span>
+          <div class="hup-control">
+            <label class="hup-toggle">
+              <input type="checkbox" id="sc-show-variation" value="true">
+              <span class="hup-toggle__track" aria-hidden="true"></span>Mostrar variación
+            </label>
+            <label class="hup-toggle">
+              <input type="checkbox" id="sc-show-date" value="true">
+              <span class="hup-toggle__track" aria-hidden="true"></span>Mostrar fecha
+            </label>
+          </div>
+        </div>
+
+        <div class="hup-field hup-field--stacked" id="hupind-date-format-row" hidden>
+          <label class="hup-label" for="sc-date-format">Formato de fecha</label>
+          <div class="hup-control">
+            <select id="sc-date-format" class="hup-select">
               <option value="short">03 jun 2026</option>
               <option value="long">3 de junio de 2026</option>
               <option value="numeric">03/06/2026</option>
@@ -183,52 +148,28 @@ foreach ( $hupind_indicators as $hupind_ind ) {
               <option value="dots">03.06.2026</option>
             </select>
           </div>
-
-          <!-- Mostrar variación y fecha — lado a lado -->
-          <div class="hupind-switches-row">
-
-            <div class="hupind-switch-box">
-              <span class="hupind-form-label">Mostrar variación %</span>
-              <label class="hupind-switch">
-                <input type="checkbox" id="sc-show-variation" name="sc_show_variation" value="true">
-                <span class="hupind-switch__track"></span>
-              </label>
-            </div>
-
-            <div class="hupind-switch-box">
-              <span class="hupind-form-label">Mostrar fecha</span>
-              <label class="hupind-switch">
-                <input type="checkbox" id="sc-show-date" name="sc_show_date" value="true">
-                <span class="hupind-switch__track"></span>
-              </label>
-            </div>
-
-          </div>
-
         </div>
       </div>
+    </section>
 
-      <!-- Shortcode generado -->
-      <div class="hupind-card">
-        <div class="hupind-card__header">
-          <h2 class="hupind-card__title">Shortcode</h2>
-        </div>
-        <div class="hupind-card__body">
-          <div id="hupind-sc-preview" class="hupind-shortcode-preview">[hupind_indicadores]</div>
-          <div style="margin-top:12px;">
-            <button type="button" class="hupind-btn hupind-btn-outline" id="hupind-copy-btn">
-              <span class="dashicons dashicons-clipboard"></span>
-              Copiar
-            </button>
-          </div>
-          <p style="margin:12px 0 0;font-size:11px;color:var(--hupind-sidebar-text);">
-            Pégalo en cualquier widget de texto, Bricks Builder o Elementor.
-          </p>
-        </div>
+    <section class="hup-card" aria-labelledby="hupind-shortcode-title">
+      <div class="hup-card__head">
+        <h3 class="hup-card__title" id="hupind-shortcode-title">Shortcode generado</h3>
       </div>
-
-    </div><!-- .hupind-builder-options -->
-
-  </div><!-- .hupind-builder-layout -->
-
-</form>
+      <div class="hup-card__body">
+        <div class="hup-code">
+          <code id="hupind-sc-preview">[hupind_indicadores]</code>
+          <button type="button" class="hup-btn hup-btn--sm" id="hupind-copy-btn" data-hup-copy="#hupind-sc-preview">
+            <span class="dashicons dashicons-admin-page" aria-hidden="true"></span>
+            <span class="hup-btn__label">Copiar</span>
+          </button>
+        </div>
+        <div id="hupind-no-indicators" class="hup-notice hup-notice--warning" hidden>
+          <span class="dashicons dashicons-warning" aria-hidden="true"></span>
+          <p>Activa al menos un indicador para generar un shortcode útil.</p>
+        </div>
+        <p class="hup-hint">Pégalo en un bloque Shortcode de WordPress o en tu maquetador. <a href="<?php echo esc_url( add_query_arg( [ 'page' => 'hupind-indicadores', 'tab' => 'guide' ], admin_url( 'admin.php' ) ) ); ?>">Ver la guía</a>.</p>
+      </div>
+    </section>
+  </div>
+</div>

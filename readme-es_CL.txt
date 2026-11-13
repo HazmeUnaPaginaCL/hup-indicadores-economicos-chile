@@ -17,7 +17,7 @@ Tags: chile, currency, exchange rate, uf, economy
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.1.1
+Stable tag: 1.2.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -37,7 +37,7 @@ Este proyecto es independiente y no está afiliado a ninguna entidad gubernament
 * 12 indicadores: UF, UTM, Dólar, Euro, IPC, IVP, IMACEC, TPM, Libra de Cobre, Tasa de Desempleo, Bitcoin y Dólar Intercambio
 * Dólar Aduanero para importaciones/exportaciones — derivado del dólar observado (el valor del penúltimo día hábil del mes anterior, la misma regla que aplica el Servicio Nacional de Aduanas)
 * Shortcode `[hupind_indicadores]` con múltiples parámetros configurables
-* Panel de administración en **Herramientas** — selección de indicadores y generador de shortcode en una sola pantalla
+* Menú de administración propio — selección de indicadores, generador de shortcode en vivo, caché y guía de uso
 * Formato automático según el tipo de indicador: `$` (CLP), `US$` (USD) o `%` (porcentaje)
 * Variación respecto al día anterior: `%` para precios/divisas, puntos porcentuales (`pp`) para tasas e índices
 * Flechas ▲ verde / ▼ roja para variación positiva/negativa
@@ -71,14 +71,14 @@ Este plugin se conecta a la API pública de mindicador.cl para obtener los valor
 
 * Servicio: mindicador.cl — https://mindicador.cl
 * Qué se envía: nada. El plugin solo realiza solicitudes de lectura (GET) para obtener los valores de los indicadores; no se transmite ningún dato personal ni del sitio.
-* Cuándo: al renderizar el shortcode y cuando la caché ha expirado (la duración de la caché es configurable, 1 hora por defecto).
+* Cuándo: durante las actualizaciones en segundo plano con WP-Cron según el intervalo configurado (1 hora por defecto), y en una solicitud inicial si aún no hay ningún valor en caché.
 * Términos / privacidad: https://mindicador.cl
 
 == Installation ==
 
 1. Sube la carpeta `hup-indicadores-economicos-chile` al directorio `/wp-content/plugins/`.
 2. Activa el plugin desde el menú **Plugins** de WordPress.
-3. Ve a **Herramientas → HUP Indicadores** en el panel de administración.
+3. Abre **HUP - Indicadores Económicos** en el panel de administración.
 4. Activa los indicadores que quieras mostrar y ajusta los decimales.
 5. Copia el shortcode generado automáticamente y pégalo donde lo necesites.
 
@@ -114,11 +114,18 @@ Configurable por indicador desde el panel de administración (0 a 4 decimales).
 
 == Screenshots ==
 
-1. Panel de administración — selección de indicadores con interruptores y configuración de decimales.
-2. Opciones del shortcode con generador en vivo, formato de fecha y referencia de clases BEM en un acordeón.
-3. Panel de caché con estadísticas de la última consulta y duración configurable.
+1. Pantalla Indicadores — interruptores, decimales y generador de shortcode en vivo.
+2. Opciones del shortcode y botón Copiar con el diseño de administración HUP.
+3. Pantalla Caché — última actualización, duración y limpieza de caché.
+4. Pantalla Guía — primeros pasos, clases BEM y fuente de datos.
 
 == Changelog ==
+
+= 1.2.0 =
+* Panel rediseñado con HUP Admin UI 1.1.0: encabezado, navegación, tarjetas, controles y diseño adaptable.
+* Nueva guía de uso del shortcode, clases CSS y fuente de datos.
+* Configuración trasladada a un menú de administración propio; los enlaces anteriores desde Herramientas redirigen al nuevo.
+* Confirmación antes de limpiar la caché y explicación más clara de las actualizaciones en segundo plano.
 
 = 1.1.1 =
 * Se agrega un espacio entre el nombre del indicador, su valor y la variación (ej. "UF $38.123,45 ▲ 0,12%") para mejor legibilidad. Solo visual; sin cambios de comportamiento.
@@ -144,6 +151,9 @@ Configurable por indicador desde el panel de administración (0 a 4 decimales).
 * Sin CSS en el frontend — diseño BEM listo para estilizar. Compatible con Bricks Builder y Elementor.
 
 == Upgrade Notice ==
+
+= 1.2.0 =
+La configuración ahora aparece en el menú HUP - Indicadores Económicos. Los enlaces anteriores desde Herramientas redirigen automáticamente.
 
 = 1.1.1 =
 Agrega espacio entre el nombre del indicador, el valor y la variación para mejor legibilidad. Solo visual.

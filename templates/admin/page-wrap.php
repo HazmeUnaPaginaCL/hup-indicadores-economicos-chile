@@ -1,78 +1,70 @@
 <?php
 if ( ! defined( 'ABSPATH' ) ) exit;
-// $hupind_current_tab lo define HUPIND_Admin::render_page() antes del require; default defensivo por si se incluyera suelto.
+
+// HUPIND_Admin::render_page() valida la sección y define $hupind_sections.
 $hupind_current_tab = $hupind_current_tab ?? 'indicators';
+$hupind_sections    = $hupind_sections ?? [];
 ?>
+<div class="wrap">
+  <h1 class="screen-reader-text">HUP - Indicadores Económicos (Chile)</h1>
 
-<div class="hupind-wrap">
-
-  <!-- Header limpio: icono + título + descripción + contacto -->
-  <div class="hupind-header">
-    <div class="hupind-header__brand">
-      <div class="hupind-header__icon">
-        <span class="dashicons dashicons-chart-line"></span>
+  <div class="hup-app" style="--hup-plugin:#2271b1">
+    <header class="hup-header">
+      <div class="hup-header__icon">
+        <span class="dashicons dashicons-chart-line" aria-hidden="true"></span>
       </div>
-      <div>
-        <h1 class="hupind-header__title">
+      <div class="hup-header__text">
+        <h2 class="hup-header__title">
           HUP - Indicadores Económicos (Chile)
-          <span class="hupind-header__version">v<?php echo esc_html( HUPIND_VERSION ); ?></span>
-        </h1>
-        <p class="hupind-header__desc">Indicadores económicos en tiempo real desde mindicador.cl</p>
+          <span class="hup-badge hup-badge--version">v<?php echo esc_html( HUPIND_VERSION ); ?></span>
+        </h2>
+        <p class="hup-header__desc">Publica indicadores económicos de Chile con un shortcode configurable.</p>
       </div>
-    </div>
-    <div class="hupind-header__contact">
-      <span class="dashicons dashicons-email-alt"></span>
-      <span>¿Dudas o soporte? <a href="mailto:contacto@hazmeunapagina.cl">contacto@hazmeunapagina.cl</a></span>
+      <div class="hup-header__support">
+        <span class="dashicons dashicons-email-alt" aria-hidden="true"></span>
+        ¿Dudas o soporte?
+        <a href="mailto:contacto@hazmeunapagina.cl">contacto@hazmeunapagina.cl</a>
+      </div>
+    </header>
+
+    <div class="hup-layout">
+      <nav class="hup-nav" aria-label="Secciones">
+        <ul class="hup-nav__list">
+          <?php foreach ( $hupind_sections as $hupind_slug => $hupind_section ) : ?>
+            <li>
+              <a class="hup-nav__item<?php echo $hupind_slug === $hupind_current_tab ? ' is-active' : ''; ?>"
+                 href="<?php echo esc_url( add_query_arg( [ 'page' => 'hupind-indicadores', 'tab' => $hupind_slug ], admin_url( 'admin.php' ) ) ); ?>"
+                 <?php echo $hupind_slug === $hupind_current_tab ? 'aria-current="page"' : ''; ?>>
+                <span class="dashicons <?php echo esc_attr( $hupind_section[1] ); ?>" aria-hidden="true"></span>
+                <?php echo esc_html( $hupind_section[0] ); ?>
+              </a>
+            </li>
+          <?php endforeach; ?>
+        </ul>
+        <div class="hup-nav__footer">
+          Hecho por <a href="https://hazmeunapagina.cl" target="_blank" rel="noopener">HUP</a>
+        </div>
+      </nav>
+
+      <main class="hup-main">
+        <div class="hup-page-head">
+          <h2><?php echo esc_html( $hupind_sections[ $hupind_current_tab ][0] ); ?></h2>
+          <p><?php echo esc_html( $hupind_sections[ $hupind_current_tab ][2] ); ?></p>
+        </div>
+
+        <?php
+        switch ( $hupind_current_tab ) {
+            case 'cache':
+                require HUPIND_PATH . 'templates/admin/tab-cache.php';
+                break;
+            case 'guide':
+                require HUPIND_PATH . 'templates/admin/tab-guide.php';
+                break;
+            default:
+                require HUPIND_PATH . 'templates/admin/tab-indicators.php';
+        }
+        ?>
+      </main>
     </div>
   </div>
-
-  <!-- Layout -->
-  <div class="hupind-layout">
-
-    <!-- Sidebar -->
-    <nav class="hupind-sidebar">
-
-      <button class="hupind-tab-btn <?php echo 'indicators' === $hupind_current_tab ? 'is-active' : ''; ?>"
-              data-tab="indicators"
-              type="button">
-        <span class="hupind-tab-icon hupind-tab-icon--blue">
-          <span class="dashicons dashicons-list-view"></span>
-        </span>
-        Indicadores
-      </button>
-
-      <button class="hupind-tab-btn <?php echo 'cache' === $hupind_current_tab ? 'is-active' : ''; ?>"
-              data-tab="cache"
-              type="button">
-        <span class="hupind-tab-icon hupind-tab-icon--orange">
-          <span class="dashicons dashicons-database"></span>
-        </span>
-        Caché
-      </button>
-
-      <div class="hupind-sidebar-footer">
-        Hecho con ❤️ por HUP
-      </div>
-
-    </nav>
-
-    <!-- Content -->
-    <div class="hupind-content">
-
-      <div id="hupind-tab-indicators"
-           class="hupind-tab-panel <?php echo 'indicators' !== $hupind_current_tab ? 'hupind-hidden' : ''; ?>">
-        <?php require HUPIND_PATH . 'templates/admin/tab-indicators.php'; ?>
-      </div>
-
-      <div id="hupind-tab-cache"
-           class="hupind-tab-panel <?php echo 'cache' !== $hupind_current_tab ? 'hupind-hidden' : ''; ?>">
-        <?php require HUPIND_PATH . 'templates/admin/tab-cache.php'; ?>
-      </div>
-
-    </div><!-- .hupind-content -->
-
-  </div><!-- .hupind-layout -->
-
-</div><!-- .hupind-wrap -->
-
-<div id="hupind-toast" class="hupind-toast" role="status" aria-live="polite"></div>
+</div>

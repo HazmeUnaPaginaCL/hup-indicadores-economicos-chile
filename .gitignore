@@ -18,3 +18,5 @@ desktop.ini
 # Archivos internos de desarrollo - estrategia de negocio, no van al repo público
 CLAUDE.md
 TASKS.md
+# Copia de trabajo del sistema de diseño HUP (la maestra vive aparte)
+.diseno-plugin/

@@ -313,6 +313,6 @@ class HUPIND_API {
     public static function get_last_update(): string {
         $ts = (int) get_option( 'hupind_last_update', 0 );
         if ( ! $ts ) return 'Sin datos aún';
-        return date_i18n( 'd/m/Y H:i:s', $ts );
+        return wp_date( 'd/m/Y H:i', $ts );
     }
 }

@@ -5,11 +5,17 @@
 .git
 .gitignore
 .gitattributes
+.github
 
 # Documentación e instrucciones de desarrollo (IA)
 .claude
 CLAUDE.md
 TASKS.md
+.diseno-plugin
+hup-ui/CLAUDE.md
+hup-ui/README.md
+hup-ui/CHANGELOG.md
+hup-ui/componentes.html
 
 # Configuración del editor (solo desarrollo)
 .vscode

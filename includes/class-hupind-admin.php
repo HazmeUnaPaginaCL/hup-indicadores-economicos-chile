@@ -3,8 +3,11 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
 class HUPIND_Admin {
 
+    private string $page_hook = '';
+
     public function __construct() {
         add_action( 'admin_menu',            [ $this, 'register_menu' ] );
+        add_action( 'admin_init',            [ $this, 'redirect_legacy_page' ] );
         add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
         add_action( 'admin_post_hupind_save',     [ $this, 'handle_save' ] );
         add_action( 'wp_ajax_hupind_clear_cache', [ $this, 'ajax_clear_cache' ] );
@@ -12,39 +15,78 @@ class HUPIND_Admin {
     }
 
     public function register_menu(): void {
-        add_management_page(
+        $this->page_hook = (string) add_menu_page(
             'HUP - Indicadores Económicos (Chile)',
             'HUP - Indicadores Económicos',
             'manage_options',
             'hupind-indicadores',
-            [ $this, 'render_page' ]
+            [ $this, 'render_page' ],
+            'dashicons-chart-line',
+            81
         );
+    }
+
+    /** Conserva los enlaces antiguos a Herramientas tras mover el panel al menú principal. */
+    public function redirect_legacy_page(): void {
+        global $pagenow;
+
+        if ( 'tools.php' !== $pagenow || ! current_user_can( 'manage_options' ) ) return;
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Redirección de una página de solo lectura.
+        $page = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';
+        if ( 'hupind-indicadores' !== $page ) return;
+
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Solo conserva la sección solicitada en la URL.
+        $tab = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : 'indicators';
+        if ( ! in_array( $tab, [ 'indicators', 'cache', 'guide' ], true ) ) $tab = 'indicators';
+
+        wp_safe_redirect( add_query_arg( [ 'page' => 'hupind-indicadores', 'tab' => $tab ], admin_url( 'admin.php' ) ) );
+        exit;
     }
 
     /**
      * Añade un enlace "Configurar" en la fila del plugin (listado de plugins)
-     * que lleva directamente a su pantalla bajo Herramientas.
+     * que lleva directamente a su pantalla de configuración.
      */
     public function add_settings_link( array $links ): array {
-        $url = admin_url( 'tools.php?page=hupind-indicadores' );
+        $url = admin_url( 'admin.php?page=hupind-indicadores' );
         array_unshift( $links, '<a href="' . esc_url( $url ) . '">Configurar</a>' );
         return $links;
     }
 
     public function enqueue_assets( string $hook ): void {
-        if ( 'tools_page_hupind-indicadores' !== $hook ) return;
+        if ( $this->page_hook !== $hook ) return;
 
+        wp_enqueue_style( 'dashicons' );
+        wp_enqueue_style(
+            'hup-ui-tokens-hupind',
+            HUPIND_URL . 'hup-ui/tokens.css',
+            [],
+            '1.1.0'
+        );
+        wp_enqueue_style(
+            'hup-ui-hupind',
+            HUPIND_URL . 'hup-ui/hup-admin.css',
+            [ 'hup-ui-tokens-hupind' ],
+            '1.1.0'
+        );
         wp_enqueue_style(
             'hupind-admin',
             HUPIND_URL . 'assets/css/hupind-admin.css',
-            [],
+            [ 'hup-ui-hupind' ],
             HUPIND_VERSION
+        );
+        wp_enqueue_script(
+            'hup-ui-hupind',
+            HUPIND_URL . 'hup-ui/hup-admin.js',
+            [],
+            '1.1.0',
+            true
         );
 
         wp_enqueue_script(
             'hupind-admin',
             HUPIND_URL . 'assets/js/hupind-admin.js',
-            [],
+            [ 'hup-ui-hupind' ],
             HUPIND_VERSION,
             true
         );
@@ -53,7 +95,6 @@ class HUPIND_Admin {
             'ajaxUrl'    => admin_url( 'admin-ajax.php' ),
             'nonceClear' => wp_create_nonce( 'hupind_clear_cache' ),
             'i18n'       => [
-                'saved'    => 'Cambios guardados correctamente.',
                 'clearing' => 'Limpiando...',
                 'cleared'  => 'Caché eliminado correctamente.',
                 'error'    => 'Ocurrió un error. Intenta de nuevo.',
@@ -64,7 +105,12 @@ class HUPIND_Admin {
     public function render_page(): void {
         if ( ! current_user_can( 'manage_options' ) ) return;
 
-        $allowed_tabs = [ 'indicators', 'cache' ];
+        $hupind_sections = [
+            'indicators' => [ 'Indicadores', 'dashicons-chart-line', 'Elige los valores que mostrarás y prepara tu shortcode.' ],
+            'cache'      => [ 'Caché', 'dashicons-database', 'Configura cada cuánto se actualizan los datos.' ],
+            'guide'      => [ 'Guía', 'dashicons-book', 'Aprende a publicar y personalizar los indicadores.' ],
+        ];
+        $allowed_tabs = array_keys( $hupind_sections );
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Solo lectura del tab activo para mostrar; no procesa datos ni tiene efectos secundarios.
         $hupind_current_tab  = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : 'indicators';
         if ( ! in_array( $hupind_current_tab, $allowed_tabs, true ) ) {
@@ -114,7 +160,8 @@ class HUPIND_Admin {
         }
 
         $tab = isset( $_POST['_tab'] ) ? sanitize_key( wp_unslash( $_POST['_tab'] ) ) : 'indicators';
-        wp_safe_redirect( add_query_arg( [ 'page' => 'hupind-indicadores', 'tab' => $tab, 'saved' => '1' ], admin_url( 'tools.php' ) ) );
+        if ( ! in_array( $tab, [ 'indicators', 'cache' ], true ) ) $tab = 'indicators';
+        wp_safe_redirect( add_query_arg( [ 'page' => 'hupind-indicadores', 'tab' => $tab, 'saved' => '1' ], admin_url( 'admin.php' ) ) );
         exit;
     }
 
