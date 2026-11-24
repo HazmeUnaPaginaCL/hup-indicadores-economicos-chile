@@ -16,8 +16,8 @@ Contributors: hazmeunapagina
 Tags: chile, currency, exchange rate, uf, economy
 Requires at least: 6.0
 Tested up to: 7.1
-Requires PHP: 7.4
-Stable tag: 1.2.0
+Requires PHP: 8.2
+Stable tag: 1.2.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -120,6 +120,16 @@ Configurable por indicador desde el panel de administración (0 a 4 decimales).
 4. Pantalla Guía — primeros pasos, clases BEM y fuente de datos.
 
 == Changelog ==
+
+= 1.2.1 =
+* Corregido: «Limpiar caché» pide valores nuevos en el momento. Si mindicador.cl no responde, se conserva la última copia válida y se avisa.
+* Corregido: los errores del panel ya no aparecen como aviso de éxito.
+* Corregido: los corchetes en el separador o en la clase CSS ya no rompen el shortcode generado.
+* Corregido: el ejemplo del formato de número «Sin signo».
+* Corregido: en móvil, los identificadores largos ya no se montan sobre el campo de decimales.
+* Mejorado: la última copia válida de cada indicador ya no se carga en todas las páginas.
+* Panel: los botones del pie de tarjeta bajan de línea en móvil, pie de menú nuevo, y el enlace del listado de plugins dice «Configuración».
+* Cambio: requiere PHP 8.2.
 
 = 1.2.0 =
 * Panel rediseñado con el diseño de administración común de HUP: encabezado, navegación, tarjetas, controles y diseño adaptable.

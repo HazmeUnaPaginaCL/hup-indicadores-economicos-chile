@@ -3,8 +3,8 @@ Contributors: hazmeunapagina
 Tags: chile, currency, exchange rate, uf, economy
 Requires at least: 6.0
 Tested up to: 7.1
-Requires PHP: 7.4
-Stable tag: 1.2.0
+Requires PHP: 8.2
+Stable tag: 1.2.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -85,7 +85,7 @@ Yes. The plugin does not load any CSS on the frontend on purpose. Use the BEM cl
 
 = What happens if the mindicador.cl API does not respond? =
 
-The plugin keeps a permanent fallback transient with the last successful value. Once at least one request has succeeded, that value is served automatically if the API later fails, so the frontend never goes blank. Only on a brand-new install, before the first successful request and while the API is unreachable, is there no value to show; in that case the shortcode outputs a short notice that you can customize with the `error_text` attribute (set `error_text=""` to output nothing).
+The plugin keeps a permanent copy of the last successful value. Once at least one request has succeeded, that value is served automatically if the API later fails, so the frontend never goes blank. Only on a brand-new install, before the first successful request and while the API is unreachable, is there no value to show; in that case the shortcode outputs a short notice that you can customize with the `error_text` attribute (set `error_text=""` to output nothing).
 
 = How is the Customs Dollar (Dólar Aduanero) calculated? =
 
@@ -107,6 +107,16 @@ Configurable per indicator from the admin screen (0 to 4 decimals).
 4. Guide screen — setup steps, BEM classes and data source.
 
 == Changelog ==
+
+= 1.2.1 =
+* Fixed: clearing the cache now fetches fresh values right away. If mindicador.cl does not respond, the last valid copy is kept and you are told.
+* Fixed: errors in the admin screen are no longer shown as success notices.
+* Fixed: brackets in the separator or CSS class no longer break the generated shortcode.
+* Fixed: the "Sin signo" number format example.
+* Fixed: in the admin screen, long indicator names no longer overlap the decimals field on mobile.
+* Improved: the last valid copy of each indicator is no longer loaded on every page.
+* Admin: card footer buttons wrap on small screens, new menu footer, and the settings link in the plugins list now reads "Configuración".
+* Changed: requires PHP 8.2.
 
 = 1.2.0 =
 * Redesigned the admin screen with the shared HUP admin design: header, navigation, cards, controls and responsive layout.
@@ -138,6 +148,9 @@ Configurable per indicator from the admin screen (0 to 4 decimals).
 * No CSS on the frontend — BEM design ready to style. Compatible with Bricks Builder and Elementor.
 
 == Upgrade Notice ==
+
+= 1.2.1 =
+Clearing the cache now fetches fresh values. Requires PHP 8.2.
 
 = 1.2.0 =
 The settings page now appears in its own HUP - Indicadores Económicos admin menu. Existing Tools links redirect automatically.

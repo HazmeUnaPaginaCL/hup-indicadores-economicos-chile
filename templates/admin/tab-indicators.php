@@ -111,7 +111,7 @@ $hupind_saved = isset( $_GET['saved'] ) && is_string( $_GET['saved'] ) && '1' ==
             <select id="sc-format" class="hup-select">
               <option value="auto">Automático — $, US$ o %</option>
               <option value="clp">Forzar CLP — $38.245,67</option>
-              <option value="raw">Sin signo — 38245,67</option>
+              <option value="raw">Sin signo — 38.245,67</option>
             </select>
           </div>
         </div>

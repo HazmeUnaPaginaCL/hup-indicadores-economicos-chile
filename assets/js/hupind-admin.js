@@ -15,6 +15,15 @@
       return String(value).replace(/"/g, '&quot;');
     }
 
+    // Los corchetes cierran el shortcode y «<» invalida el atributo: se quitan
+    // del propio campo, para que se vea lo que se copiará.
+    function cleanField(input) {
+      if (!input) return '';
+      var clean = input.value.replace(/[\[\]<]/g, '');
+      if (clean !== input.value) input.value = clean;
+      return clean;
+    }
+
     function buildShortcode() {
       var checks = document.querySelectorAll('.hupind-indicator-check:checked');
       var ids = Array.from(checks).map(function (check) {
@@ -29,9 +38,9 @@
       var dateFormatEl = document.getElementById('sc-date-format');
 
       var layout = layoutEl ? layoutEl.value : 'horizontal';
-      var separator = separatorEl ? separatorEl.value : '|';
+      var separator = separatorEl ? cleanField(separatorEl) : '|';
       var format = formatEl ? formatEl.value : 'auto';
-      var extraClass = classEl ? classEl.value.trim() : '';
+      var extraClass = cleanField(classEl).trim();
       var showVariation = variationEl && variationEl.checked;
       var showDate = dateEl && dateEl.checked;
       var dateFormat = dateFormatEl ? dateFormatEl.value : 'short';
@@ -95,15 +104,19 @@
       fetch(hupindData.ajaxUrl, { method: 'POST', body: data })
         .then(function (response) { return response.json(); })
         .then(function (result) {
-          if (!result.success) throw new Error('clear-cache-failed');
-          if (window.HUP && HUP.toast) HUP.toast(hupindData.i18n.cleared);
+          var message = result && result.data && result.data.message;
+          if (!result || !result.success) {
+            if (window.HUP && HUP.toast) HUP.toast(message || hupindData.i18n.error, 'error');
+            return;
+          }
+          if (window.HUP && HUP.toast) HUP.toast(message);
           var lastUpdate = document.getElementById('hupind-last-update');
           if (lastUpdate && result.data && result.data.last_update) {
             lastUpdate.textContent = result.data.last_update;
           }
         })
         .catch(function () {
-          if (window.HUP && HUP.toast) HUP.toast(hupindData.i18n.error);
+          if (window.HUP && HUP.toast) HUP.toast(hupindData.i18n.error, 'error');
         })
         .finally(function () {
           button.disabled = false;

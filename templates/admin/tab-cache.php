@@ -66,10 +66,10 @@ $hupind_saved = isset( $_GET['saved'] ) && is_string( $_GET['saved'] ) && '1' ==
       <h3 class="hup-card__title" id="hupind-clear-cache-title">Limpiar caché</h3>
     </div>
     <div class="hup-card__body">
-      <p class="hup-hint">Elimina los datos temporales activos. La última copia válida se conserva y WP-Cron vuelve a consultar la API.</p>
+      <p class="hup-hint">Elimina los datos temporales y pide valores nuevos a mindicador.cl. Si no responde, se conserva la última copia válida.</p>
       <div>
         <button type="button" id="hupind-clear-cache-btn" class="hup-btn hup-btn--danger"
-                data-hup-confirm="¿Limpiar los datos temporales de los indicadores?">
+                data-hup-confirm="¿Limpiar la caché y pedir valores nuevos?">
           <span class="dashicons dashicons-trash" aria-hidden="true"></span>
           <span class="hup-spinner" hidden aria-hidden="true"></span>
           <span class="hup-btn__label">Limpiar caché</span>

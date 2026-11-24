@@ -30,6 +30,16 @@
   overflow-wrap: anywhere;
 }
 
+/* En móvil el identificador baja de línea en vez de montarse sobre los decimales. */
+.hup-app .hupind-indicator-option .hup-row__text {
+  min-width: 0;
+}
+
+.hup-app .hupind-indicator-option .hup-tag {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
 .hup-app .hupind-indicator-option .hup-row__desc {
   margin-top: 3px;
 }

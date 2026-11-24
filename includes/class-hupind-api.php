@@ -7,6 +7,9 @@ class HUPIND_API {
     const CRON_HOOK     = 'hupind_refresh';
     const CRON_SCHEDULE = 'hupind_refresh_interval';
 
+    /** Opción con la última copia válida de cada indicador. */
+    const FALLBACK_OPTION = 'hupind_fallback';
+
     private static array $valid_ids = [
         'uf', 'utm', 'dolar', 'euro', 'ipc', 'ivp',
         'imacec', 'tpm', 'libra_cobre', 'tasa_desempleo',
@@ -46,7 +49,17 @@ class HUPIND_API {
         return self::fetch_from_api( $id );
     }
 
+    /** Valor nuevo de la API o, si falla, la última copia válida. */
     private static function fetch_from_api( string $id ): ?array {
+        return self::fetch_fresh( $id ) ?? self::get_fallback( $id );
+    }
+
+    /**
+     * Pide un valor a la API y lo guarda. null si la API no respondió bien.
+     *
+     * @param int $timeout Segundos de espera por petición.
+     */
+    private static function fetch_fresh( string $id, int $timeout = 10 ): ?array {
         if ( ! in_array( $id, self::$valid_ids, true ) ) {
             return null;
         }
@@ -54,23 +67,29 @@ class HUPIND_API {
         // El dólar aduanero no es un endpoint de mindicador: se deriva de la serie
         // diaria del dólar observado (penúltimo día hábil del mes anterior).
         if ( 'dolar_aduanero' === $id ) {
-            return self::fetch_dolar_aduanero();
+            return self::fetch_dolar_aduanero( $timeout );
         }
 
         $url      = 'https://mindicador.cl/api/' . rawurlencode( $id );
-        $response = wp_remote_get( $url, [ 'timeout' => 10 ] );
+        $response = wp_remote_get( $url, [ 'timeout' => $timeout ] );
 
         if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
-            return self::get_fallback( $id );
+            return null;
         }
 
         $body = json_decode( wp_remote_retrieve_body( $response ), true );
-        if ( empty( $body['serie'] ) || ! isset( $body['serie'][0] ) ) {
-            return self::get_fallback( $id );
+        if ( ! isset( $body['serie'][0]['valor'] ) ) {
+            return null;
         }
 
         $actual   = (float) $body['serie'][0]['valor'];
-        $anterior = isset( $body['serie'][1] ) ? (float) $body['serie'][1]['valor'] : $actual;
+        $anterior = (float) ( $body['serie'][1]['valor'] ?? $actual );
+
+        return self::store( $id, $actual, $anterior, $body['serie'][0]['fecha'] ?? '' );
+    }
+
+    /** Guarda un valor en la caché y en la última copia válida. */
+    private static function store( string $id, float $actual, float $anterior, string $fecha ): array {
         $variacion = $anterior > 0 ? ( ( $actual - $anterior ) / $anterior ) * 100 : 0;
 
         $data = [
@@ -78,12 +97,17 @@ class HUPIND_API {
             'valor'     => $actual,
             'anterior'  => $anterior,
             'variacion' => round( $variacion, 3 ),
-            'fecha'     => $body['serie'][0]['fecha'] ?? '',
+            'fecha'     => $fecha,
         ];
 
-        $duration = (int) get_option( 'hupind_cache_duration', 3600 );
-        set_transient( 'hupind_data_'     . $id, $data, $duration );
-        set_transient( 'hupind_fallback_' . $id, $data, 0 );
+        set_transient( 'hupind_data_' . $id, $data, (int) get_option( 'hupind_cache_duration', 3600 ) );
+
+        // La copia va en una opción sin carga automática: hasta la 1.2.0 eran
+        // transients sin vencimiento, que WordPress carga en todas las páginas.
+        $fallback        = (array) get_option( self::FALLBACK_OPTION, [] );
+        $fallback[ $id ] = $data;
+        update_option( self::FALLBACK_OPTION, $fallback, false );
+        delete_transient( 'hupind_fallback_' . $id );
 
         // Solo escribir timestamp si el valor guardado ya tiene más de 60s de antigüedad,
         // evitando N writes a la BD cuando se refrescan varios indicadores seguidos.
@@ -104,7 +128,7 @@ class HUPIND_API {
      * no se descarga de aduana.cl. La variación es mes a mes (respecto al valor del
      * mes anterior, es decir el penúltimo día hábil de dos meses atrás).
      */
-    private static function fetch_dolar_aduanero(): ?array {
+    private static function fetch_dolar_aduanero( int $timeout ): ?array {
         $year  = (int) wp_date( 'Y' );
         $month = (int) wp_date( 'n' );
 
@@ -112,40 +136,22 @@ class HUPIND_API {
         list( $y2, $m2 ) = self::prev_month( $y1, $m1 );      // dos meses atrás (para variación)
 
         // Serie(s) anual(es) necesaria(s): 1 llamada, o 2 si cruzan el borde de año.
-        $series = self::fetch_dolar_serie( $y1 );
+        $series = self::fetch_dolar_serie( $y1, $timeout );
         if ( $y2 !== $y1 ) {
-            $series = array_merge( self::fetch_dolar_serie( $y2 ), $series );
+            $series = array_merge( self::fetch_dolar_serie( $y2, $timeout ), $series );
         }
 
         $actual_row = self::penultimo_habil( $series, $y1, $m1 );
         if ( null === $actual_row ) {
-            // Sin datos suficientes (API caída en frío): servimos el último valor bueno.
-            return self::get_fallback( 'dolar_aduanero' );
+            // Sin datos suficientes (API caída).
+            return null;
         }
         $anterior_row = self::penultimo_habil( $series, $y2, $m2 );
 
-        $actual    = (float) $actual_row['valor'];
-        $anterior  = $anterior_row ? (float) $anterior_row['valor'] : $actual;
-        $variacion = $anterior > 0 ? ( ( $actual - $anterior ) / $anterior ) * 100 : 0;
+        $actual   = (float) $actual_row['valor'];
+        $anterior = $anterior_row ? (float) $anterior_row['valor'] : $actual;
 
-        $data = [
-            'id'        => 'dolar_aduanero',
-            'valor'     => $actual,
-            'anterior'  => $anterior,
-            'variacion' => round( $variacion, 3 ),
-            'fecha'     => $actual_row['fecha'] ?? '',
-        ];
-
-        $duration = (int) get_option( 'hupind_cache_duration', 3600 );
-        set_transient( 'hupind_data_dolar_aduanero',     $data, $duration );
-        set_transient( 'hupind_fallback_dolar_aduanero', $data, 0 );
-
-        $last = (int) get_option( 'hupind_last_update', 0 );
-        if ( time() - $last > 60 ) {
-            update_option( 'hupind_last_update', time(), false );
-        }
-
-        return $data;
+        return self::store( 'dolar_aduanero', $actual, $anterior, $actual_row['fecha'] ?? '' );
     }
 
     /** Devuelve [ año, mes ] del mes anterior al dado (maneja el salto de enero). */
@@ -162,7 +168,7 @@ class HUPIND_API {
      * Descarga la serie diaria del dólar observado de un año completo desde mindicador.cl.
      * Se cachea por año (misma fuente y patrón wp_remote_get; no es un servicio nuevo).
      */
-    private static function fetch_dolar_serie( int $year ): array {
+    private static function fetch_dolar_serie( int $year, int $timeout ): array {
         $cache_key = 'hupind_dolar_serie_' . $year;
         $cached    = get_transient( $cache_key );
         if ( false !== $cached ) {
@@ -170,7 +176,7 @@ class HUPIND_API {
         }
 
         $url      = 'https://mindicador.cl/api/dolar/' . rawurlencode( (string) $year );
-        $response = wp_remote_get( $url, [ 'timeout' => 10 ] );
+        $response = wp_remote_get( $url, [ 'timeout' => $timeout ] );
         if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
             return [];
         }
@@ -209,8 +215,14 @@ class HUPIND_API {
     }
 
     public static function get_fallback( string $id ): ?array {
-        $fallback = get_transient( 'hupind_fallback_' . $id );
-        return false !== $fallback ? $fallback : null;
+        $fallback = (array) get_option( self::FALLBACK_OPTION, [] );
+        if ( isset( $fallback[ $id ] ) ) {
+            return $fallback[ $id ];
+        }
+
+        // Copia de la 1.2.0 o anterior, hasta la primera actualización.
+        $legacy = get_transient( 'hupind_fallback_' . $id );
+        return is_array( $legacy ) ? $legacy : null;
     }
 
     public static function get_all_active(): array {
@@ -292,9 +304,41 @@ class HUPIND_API {
      * frontend siempre lea de caché/fallback sin bloquear.
      */
     public static function refresh_all(): void {
-        foreach ( self::$valid_ids as $id ) {
-            self::fetch_from_api( $id );
+        self::refresh( 10, 3, 120 );
+    }
+
+    /**
+     * Pide valores nuevos, primero de los indicadores activos.
+     *
+     * Se detiene tras varios fallos seguidos: la API no responde y esperar cada
+     * petición restante dejaría al panel o al cron esperando sin sentido.
+     *
+     * @param int $timeout   Segundos de espera por petición.
+     * @param int $max_fails Fallos seguidos que detienen la actualización.
+     * @param int $budget    Segundos totales.
+     * @return array{updated: int, total: int}
+     */
+    public static function refresh( int $timeout, int $max_fails, int $budget ): array {
+        $enabled = [];
+        foreach ( (array) get_option( 'hupind_indicators', HUPIND_Core::$indicators_default ) as $ind ) {
+            if ( ! empty( $ind['enabled'] ) ) $enabled[] = $ind['id'];
         }
+        $ids     = array_unique( array_merge( array_intersect( $enabled, self::$valid_ids ), self::$valid_ids ) );
+        $end     = microtime( true ) + $budget;
+        $updated = 0;
+        $fails   = 0;
+
+        foreach ( $ids as $id ) {
+            if ( null !== self::fetch_fresh( $id, $timeout ) ) {
+                $updated++;
+                $fails = 0;
+            } else {
+                $fails++;
+            }
+            if ( $fails >= $max_fails || microtime( true ) >= $end ) break;
+        }
+
+        return [ 'updated' => $updated, 'total' => count( $ids ) ];
     }
 
     public static function clear_all_transients(): void {

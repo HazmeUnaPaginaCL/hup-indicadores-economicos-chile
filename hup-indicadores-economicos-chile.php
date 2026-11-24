@@ -2,19 +2,19 @@
 /**
  * Plugin Name: HUP - Indicadores Económicos (Chile)
  * Description: Muestra indicadores económicos de Chile (UF, UTM, Dólar, Euro, IPC y más) obtenidos en tiempo real desde la API pública de mindicador.cl. Shortcode [hupind_indicadores] configurable, listo para Bricks Builder, Elementor y cualquier área del sitio.
- * Version:     1.2.0
+ * Version:     1.2.1
  * Author:      HazmeUnaPagina.cl
  * Author URI:  https://hazmeunapagina.cl
  * License:     GPLv2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: hup-indicadores-economicos-chile
  * Requires at least: 6.0
- * Requires PHP: 7.4
+ * Requires PHP: 8.2
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
 
-define( 'HUPIND_VERSION',  '1.2.0' );
+define( 'HUPIND_VERSION',  '1.2.1' );
 define( 'HUPIND_PATH',     plugin_dir_path( __FILE__ ) );
 define( 'HUPIND_URL',      plugin_dir_url( __FILE__ ) );
 define( 'HUPIND_BASENAME', plugin_basename( __FILE__ ) );

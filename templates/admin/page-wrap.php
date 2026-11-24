@@ -41,9 +41,7 @@ $hupind_sections    = $hupind_sections ?? [];
             </li>
           <?php endforeach; ?>
         </ul>
-        <div class="hup-nav__footer">
-          Hecho por <a href="https://hazmeunapagina.cl" target="_blank" rel="noopener">HUP</a>
-        </div>
+        <div class="hup-nav__footer">Hecho por <a href="https://hazmeunapagina.cl" target="_blank" rel="noopener noreferrer"><strong>HUP</strong></a> <span aria-hidden="true">💻</span><br>Desde Quilpué para <a href="https://wordpress.org/plugins/search/hup/" target="_blank" rel="noopener noreferrer"><strong>WordPress</strong></a></div>
       </nav>
 
       <main class="hup-main">

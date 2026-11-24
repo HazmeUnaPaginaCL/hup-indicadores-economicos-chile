@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 class HUPIND_Admin {
 
     /** Versión de hup-ui copiada en hup-ui/ (sistema de diseño HUP). */
-    const UI_VERSION = '1.3.0';
+    const UI_VERSION = '1.3.1';
 
     /** Color propio del plugin: solo el ícono del header. */
     const COLOR = '#15803d';
@@ -50,12 +50,12 @@ class HUPIND_Admin {
     }
 
     /**
-     * Añade un enlace "Configurar" en la fila del plugin (listado de plugins)
+     * Añade un enlace "Configuración" en la fila del plugin (listado de plugins)
      * que lleva directamente a su pantalla de configuración.
      */
     public function add_settings_link( array $links ): array {
         $url = admin_url( 'admin.php?page=hupind-indicadores' );
-        array_unshift( $links, '<a href="' . esc_url( $url ) . '">Configurar</a>' );
+        array_unshift( $links, '<a href="' . esc_url( $url ) . '">' . esc_html__( 'Configuración', 'hup-indicadores-economicos-chile' ) . '</a>' );
         return $links;
     }
 
@@ -101,8 +101,7 @@ class HUPIND_Admin {
             'ajaxUrl'    => admin_url( 'admin-ajax.php' ),
             'nonceClear' => wp_create_nonce( 'hupind_clear_cache' ),
             'i18n'       => [
-                'clearing' => 'Limpiando...',
-                'cleared'  => 'Caché eliminado correctamente.',
+                'clearing' => 'Actualizando...',
                 'error'    => 'Ocurrió un error. Intenta de nuevo.',
             ],
         ] );
@@ -179,6 +178,24 @@ class HUPIND_Admin {
 
         HUPIND_API::clear_all_transients();
 
-        wp_send_json_success( [ 'last_update' => HUPIND_API::get_last_update() ] );
+        // Valores nuevos en el momento: sin esto, el sitio seguía mostrando la
+        // última copia hasta el próximo cron.
+        $result  = HUPIND_API::refresh( 5, 2, 20 );
+        $pending = $result['total'] - $result['updated'];
+
+        if ( $pending > 0 ) {
+            wp_schedule_single_event( time(), HUPIND_API::CRON_HOOK );
+        }
+
+        if ( 0 === $result['updated'] ) {
+            wp_send_json_error( [ 'message' => 'La caché se limpió, pero mindicador.cl no responde. Se muestra la última copia válida y se reintentará en segundo plano.' ] );
+        }
+
+        wp_send_json_success( [
+            'last_update' => HUPIND_API::get_last_update(),
+            'message'     => $pending > 0
+                ? sprintf( 'Se actualizaron %1$d de %2$d indicadores. El resto se actualizará en segundo plano.', $result['updated'], $result['total'] )
+                : 'Caché limpia e indicadores actualizados.',
+        ] );
     }
 }

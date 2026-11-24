@@ -4,6 +4,7 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) exit;
 delete_option( 'hupind_indicators' );
 delete_option( 'hupind_cache_duration' );
 delete_option( 'hupind_last_update' );
+delete_option( 'hupind_fallback' );
 
 $hupind_ids = [
     'uf', 'utm', 'dolar', 'euro', 'ipc', 'ivp',
