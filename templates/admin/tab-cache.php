@@ -61,20 +61,24 @@ $hupind_saved = isset( $_GET['saved'] ) && is_string( $_GET['saved'] ) && '1' ==
     </div>
   </form>
 
-  <section class="hup-card hup-card--danger" aria-labelledby="hupind-clear-cache-title">
+  <?php
+  // Antes era «Limpiar caché», en rojo y con confirmación: parecía que borraba
+  // algo. Lo que hace es pedir valores nuevos (y si mindicador.cl no responde,
+  // conserva la última copia), así que se llama por lo que hace.
+  ?>
+  <section class="hup-card" aria-labelledby="hupind-clear-cache-title">
     <div class="hup-card__head">
-      <h3 class="hup-card__title" id="hupind-clear-cache-title">Limpiar caché</h3>
-    </div>
-    <div class="hup-card__body">
-      <p class="hup-hint">Elimina los datos temporales y pide valores nuevos a mindicador.cl. Si no responde, se conserva la última copia válida.</p>
       <div>
-        <button type="button" id="hupind-clear-cache-btn" class="hup-btn hup-btn--danger"
-                data-hup-confirm="¿Limpiar la caché y pedir valores nuevos?">
-          <span class="dashicons dashicons-trash" aria-hidden="true"></span>
-          <span class="hup-spinner" hidden aria-hidden="true"></span>
-          <span class="hup-btn__label">Limpiar caché</span>
-        </button>
+        <h3 class="hup-card__title" id="hupind-clear-cache-title">Actualizar valores</h3>
+        <p class="hup-card__desc">Pide ahora los valores del día a mindicador.cl, sin esperar a que venza la caché. Si no responde, se conserva la última copia válida.</p>
       </div>
+    </div>
+    <div class="hup-card__foot">
+      <button type="button" id="hupind-clear-cache-btn" class="hup-btn hup-btn--secondary">
+        <span class="dashicons dashicons-update" aria-hidden="true"></span>
+        <span class="hup-spinner" hidden aria-hidden="true"></span>
+        <span class="hup-btn__label">Actualizar ahora</span>
+      </button>
     </div>
   </section>
 </div>

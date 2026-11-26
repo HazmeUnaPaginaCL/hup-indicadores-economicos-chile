@@ -17,7 +17,7 @@ Tags: chile, currency, exchange rate, uf, economy
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 8.2
-Stable tag: 1.2.1
+Stable tag: 1.3.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -78,7 +78,7 @@ Este plugin se conecta a la API pública de mindicador.cl para obtener los valor
 
 1. Sube la carpeta `hup-indicadores-economicos-chile` al directorio `/wp-content/plugins/`.
 2. Activa el plugin desde el menú **Plugins** de WordPress.
-3. Abre **HUP - Indicadores Económicos** en el panel de administración.
+3. Abre **Herramientas → HUP - Indicadores Económicos** en el panel de administración.
 4. Activa los indicadores que quieras mostrar y ajusta los decimales.
 5. Copia el shortcode generado automáticamente y pégalo donde lo necesites.
 
@@ -121,6 +121,12 @@ Configurable por indicador desde el panel de administración (0 a 4 decimales).
 
 == Changelog ==
 
+= 1.3.0 =
+* Cambiado: el panel ahora está en Herramientas → HUP - Indicadores Económicos. Los enlaces anteriores siguen funcionando.
+* Cambiado: «Limpiar caché» ahora se llama «Actualizar ahora», en la pestaña Caché. Hace lo mismo: pide a mindicador.cl los valores del día y conserva la última copia válida si no responde.
+* Nuevo: sección «Otros plugins HUP», con los demás plugins gratuitos de HUP y su enlace a WordPress.org.
+* Mejorado: vista en móvil, flechas en las listas desplegables, ventanas usables con teclado, ayudas accesibles y avisos que duran más y se pueden cerrar.
+
 = 1.2.1 =
 * Corregido: «Limpiar caché» pide valores nuevos en el momento. Si mindicador.cl no responde, se conserva la última copia válida y se avisa.
 * Corregido: los errores del panel ya no aparecen como aviso de éxito.
@@ -161,6 +167,12 @@ Configurable por indicador desde el panel de administración (0 a 4 decimales).
 * Sin CSS en el frontend — diseño BEM listo para estilizar. Compatible con Bricks Builder y Elementor.
 
 == Upgrade Notice ==
+
+= 1.3.0 =
+El panel pasa a Herramientas → HUP - Indicadores Económicos. La configuración no cambia.
+
+= 1.2.1 =
+«Limpiar caché» pide valores nuevos. Requiere PHP 8.2.
 
 = 1.2.0 =
 La configuración ahora aparece en el menú HUP - Indicadores Económicos. Los enlaces anteriores desde Herramientas redirigen automáticamente.

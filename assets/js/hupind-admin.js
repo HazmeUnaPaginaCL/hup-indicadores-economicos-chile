@@ -90,7 +90,7 @@
       if (!button || event.defaultPrevented || button.disabled) return;
 
       var label = button.querySelector('.hup-btn__label');
-      var icon = button.querySelector('.dashicons-trash');
+      var icon = button.querySelector('.dashicons');
       var spinner = button.querySelector('.hup-spinner');
       button.disabled = true;
       if (label) label.textContent = hupindData.i18n.clearing;
@@ -120,7 +120,7 @@
         })
         .finally(function () {
           button.disabled = false;
-          if (label) label.textContent = 'Limpiar caché';
+          if (label) label.textContent = 'Actualizar ahora';
           if (icon) icon.hidden = false;
           if (spinner) spinner.hidden = true;
         });

@@ -31,9 +31,10 @@ $hupind_sections    = $hupind_sections ?? [];
       <nav class="hup-nav" aria-label="Secciones">
         <ul class="hup-nav__list">
           <?php foreach ( $hupind_sections as $hupind_slug => $hupind_section ) : ?>
+            <?php if ( 'otros' === $hupind_slug ) : ?><li class="hup-nav__sep" role="separator"></li><?php endif; ?>
             <li>
               <a class="hup-nav__item<?php echo $hupind_slug === $hupind_current_tab ? ' is-active' : ''; ?>"
-                 href="<?php echo esc_url( add_query_arg( [ 'page' => 'hupind-indicadores', 'tab' => $hupind_slug ], admin_url( 'admin.php' ) ) ); ?>"
+                 href="<?php echo esc_url( add_query_arg( [ 'page' => 'hupind-indicadores', 'tab' => $hupind_slug ], admin_url( 'tools.php' ) ) ); ?>"
                  <?php echo $hupind_slug === $hupind_current_tab ? 'aria-current="page"' : ''; ?>>
                 <span class="dashicons <?php echo esc_attr( $hupind_section[1] ); ?>" aria-hidden="true"></span>
                 <?php echo esc_html( $hupind_section[0] ); ?>
@@ -57,6 +58,12 @@ $hupind_sections    = $hupind_sections ?? [];
                 break;
             case 'guide':
                 require HUPIND_PATH . 'templates/admin/tab-guide.php';
+                break;
+            case 'otros':
+                $hupind_otros = include HUPIND_PATH . 'hup-ui/otros-plugins.php';
+                if ( is_callable( $hupind_otros ) ) {
+                    $hupind_otros( 'hup-indicadores-economicos-chile' );
+                }
                 break;
             default:
                 require HUPIND_PATH . 'templates/admin/tab-indicators.php';

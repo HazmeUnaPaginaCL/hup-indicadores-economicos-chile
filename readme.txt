@@ -4,7 +4,7 @@ Tags: chile, currency, exchange rate, uf, economy
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 8.2
-Stable tag: 1.2.1
+Stable tag: 1.3.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -65,7 +65,7 @@ This plugin connects to the public mindicador.cl API to retrieve the current val
 
 1. Upload the `hup-indicadores-economicos-chile` folder to the `/wp-content/plugins/` directory.
 2. Activate the plugin from the **Plugins** menu in WordPress.
-3. Open **HUP - Indicadores Económicos** in the WordPress admin.
+3. Open **Tools → HUP - Indicadores Económicos** in the WordPress admin.
 4. Enable the indicators you want to show and adjust the decimals.
 5. Copy the automatically generated shortcode and paste it wherever you need it.
 
@@ -108,6 +108,12 @@ Configurable per indicator from the admin screen (0 to 4 decimals).
 
 == Changelog ==
 
+= 1.3.0 =
+* Changed: the panel now lives under Tools → HUP - Indicadores Económicos. Existing links keep working.
+* Changed: "Limpiar caché" is now "Actualizar ahora", in the Caché tab. It does the same: it asks mindicador.cl for today's values and keeps the last valid copy if it does not respond.
+* New: "Otros plugins HUP" section, listing the other free HUP plugins with a link to WordPress.org.
+* Improved: mobile layout, dropdown arrows, keyboard-friendly dialogs, accessible tooltips and notices that stay longer and can be closed.
+
 = 1.2.1 =
 * Fixed: clearing the cache now fetches fresh values right away. If mindicador.cl does not respond, the last valid copy is kept and you are told.
 * Fixed: errors in the admin screen are no longer shown as success notices.
@@ -148,6 +154,9 @@ Configurable per indicator from the admin screen (0 to 4 decimals).
 * No CSS on the frontend — BEM design ready to style. Compatible with Bricks Builder and Elementor.
 
 == Upgrade Notice ==
+
+= 1.3.0 =
+The panel moves to Tools → HUP - Indicadores Económicos. No settings change.
 
 = 1.2.1 =
 Clearing the cache now fetches fresh values. Requires PHP 8.2.

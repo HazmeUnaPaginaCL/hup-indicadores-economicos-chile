@@ -66,7 +66,7 @@ $hupind_saved = isset( $_GET['saved'] ) && is_string( $_GET['saved'] ) && '1' ==
 
       <div id="hupind-aduanero-note" class="hup-notice"<?php echo $hupind_aduanero_on ? '' : ' hidden'; ?>>
         <span class="dashicons dashicons-info" aria-hidden="true"></span>
-        <p>El Dólar Aduanero se calcula con el valor del penúltimo día hábil del mes anterior. <a href="<?php echo esc_url( add_query_arg( [ 'page' => 'hupind-indicadores', 'tab' => 'guide' ], admin_url( 'admin.php' ) ) ); ?>">Ver cómo se obtiene</a>.</p>
+        <p>El Dólar Aduanero se calcula con el valor del penúltimo día hábil del mes anterior. <a href="<?php echo esc_url( add_query_arg( [ 'page' => 'hupind-indicadores', 'tab' => 'guide' ], admin_url( 'tools.php' ) ) ); ?>">Ver cómo se obtiene</a>.</p>
       </div>
     </div>
     <div class="hup-card__foot">
@@ -168,7 +168,7 @@ $hupind_saved = isset( $_GET['saved'] ) && is_string( $_GET['saved'] ) && '1' ==
           <span class="dashicons dashicons-warning" aria-hidden="true"></span>
           <p>Activa al menos un indicador para generar un shortcode útil.</p>
         </div>
-        <p class="hup-hint">Pégalo en un bloque Shortcode de WordPress o en tu maquetador. <a href="<?php echo esc_url( add_query_arg( [ 'page' => 'hupind-indicadores', 'tab' => 'guide' ], admin_url( 'admin.php' ) ) ); ?>">Ver la guía</a>.</p>
+        <p class="hup-hint">Pégalo en un bloque Shortcode de WordPress o en tu maquetador. <a href="<?php echo esc_url( add_query_arg( [ 'page' => 'hupind-indicadores', 'tab' => 'guide' ], admin_url( 'tools.php' ) ) ); ?>">Ver la guía</a>.</p>
       </div>
     </section>
   </div>

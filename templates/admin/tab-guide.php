@@ -22,7 +22,7 @@ $hupind_rows = [
       <ol class="hup-steps">
         <li>
           <div class="hup-steps__title">Elige tus indicadores</div>
-          <p class="hup-hint">Activa los valores que quieres publicar y pulsa «Guardar cambios» en <a href="<?php echo esc_url( add_query_arg( [ 'page' => 'hupind-indicadores', 'tab' => 'indicators' ], admin_url( 'admin.php' ) ) ); ?>">Indicadores</a>.</p>
+          <p class="hup-hint">Activa los valores que quieres publicar y pulsa «Guardar cambios» en <a href="<?php echo esc_url( add_query_arg( [ 'page' => 'hupind-indicadores', 'tab' => 'indicators' ], admin_url( 'tools.php' ) ) ); ?>">Indicadores</a>.</p>
         </li>
         <li>
           <div class="hup-steps__title">Prepara el shortcode</div>

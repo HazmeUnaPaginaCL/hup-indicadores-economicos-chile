@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 class HUPIND_Admin {
 
     /** Versión de hup-ui copiada en hup-ui/ (sistema de diseño HUP). */
-    const UI_VERSION = '1.3.1';
+    const UI_VERSION = '1.4.0';
 
     /** Color propio del plugin: solo el ícono del header. */
     const COLOR = '#15803d';
@@ -12,8 +12,8 @@ class HUPIND_Admin {
     private string $page_hook = '';
 
     public function __construct() {
-        add_action( 'admin_menu',            [ $this, 'register_menu' ] );
-        add_action( 'admin_init',            [ $this, 'redirect_legacy_page' ] );
+        // Prioridad alta a propósito: deja los paneles HUP al final de Herramientas.
+        add_action( 'admin_menu',            [ $this, 'register_menu' ], 9990 );
         add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
         add_action( 'admin_post_hupind_save',     [ $this, 'handle_save' ] );
         add_action( 'wp_ajax_hupind_clear_cache', [ $this, 'ajax_clear_cache' ] );
@@ -21,32 +21,13 @@ class HUPIND_Admin {
     }
 
     public function register_menu(): void {
-        $this->page_hook = (string) add_menu_page(
+        $this->page_hook = (string) add_management_page(
             'HUP - Indicadores Económicos (Chile)',
             'HUP - Indicadores Económicos',
             'manage_options',
             'hupind-indicadores',
-            [ $this, 'render_page' ],
-            'dashicons-chart-line',
-            81
+            [ $this, 'render_page' ]
         );
-    }
-
-    /** Conserva los enlaces antiguos a Herramientas tras mover el panel al menú principal. */
-    public function redirect_legacy_page(): void {
-        global $pagenow;
-
-        if ( 'tools.php' !== $pagenow || ! current_user_can( 'manage_options' ) ) return;
-        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Redirección de una página de solo lectura.
-        $page = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';
-        if ( 'hupind-indicadores' !== $page ) return;
-
-        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Solo conserva la sección solicitada en la URL.
-        $tab = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : 'indicators';
-        if ( ! in_array( $tab, [ 'indicators', 'cache', 'guide' ], true ) ) $tab = 'indicators';
-
-        wp_safe_redirect( add_query_arg( [ 'page' => 'hupind-indicadores', 'tab' => $tab ], admin_url( 'admin.php' ) ) );
-        exit;
     }
 
     /**
@@ -54,7 +35,7 @@ class HUPIND_Admin {
      * que lleva directamente a su pantalla de configuración.
      */
     public function add_settings_link( array $links ): array {
-        $url = admin_url( 'admin.php?page=hupind-indicadores' );
+        $url = admin_url( 'tools.php?page=hupind-indicadores' );
         array_unshift( $links, '<a href="' . esc_url( $url ) . '">' . esc_html__( 'Configuración', 'hup-indicadores-economicos-chile' ) . '</a>' );
         return $links;
     }
@@ -114,6 +95,8 @@ class HUPIND_Admin {
             'indicators' => [ 'Indicadores', 'dashicons-chart-line', 'Elige los valores que mostrarás y prepara tu shortcode.' ],
             'cache'      => [ 'Caché', 'dashicons-database', 'Configura cada cuánto se actualizan los datos.' ],
             'guide'      => [ 'Guía', 'dashicons-book', 'Aprende a publicar y personalizar los indicadores.' ],
+            // Siempre la última, tras un separador.
+            'otros'      => [ 'Otros plugins HUP', 'dashicons-admin-plugins', 'Más plugins gratuitos de HUP para tu sitio WordPress.' ],
         ];
         $allowed_tabs = array_keys( $hupind_sections );
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Solo lectura del tab activo para mostrar; no procesa datos ni tiene efectos secundarios.
@@ -166,7 +149,7 @@ class HUPIND_Admin {
 
         $tab = isset( $_POST['_tab'] ) ? sanitize_key( wp_unslash( $_POST['_tab'] ) ) : 'indicators';
         if ( ! in_array( $tab, [ 'indicators', 'cache' ], true ) ) $tab = 'indicators';
-        wp_safe_redirect( add_query_arg( [ 'page' => 'hupind-indicadores', 'tab' => $tab, 'saved' => '1' ], admin_url( 'admin.php' ) ) );
+        wp_safe_redirect( add_query_arg( [ 'page' => 'hupind-indicadores', 'tab' => $tab, 'saved' => '1' ], admin_url( 'tools.php' ) ) );
         exit;
     }
 
@@ -188,14 +171,14 @@ class HUPIND_Admin {
         }
 
         if ( 0 === $result['updated'] ) {
-            wp_send_json_error( [ 'message' => 'La caché se limpió, pero mindicador.cl no responde. Se muestra la última copia válida y se reintentará en segundo plano.' ] );
+            wp_send_json_error( [ 'message' => 'mindicador.cl no responde. Se sigue mostrando la última copia válida y se reintentará en segundo plano.' ] );
         }
 
         wp_send_json_success( [
             'last_update' => HUPIND_API::get_last_update(),
             'message'     => $pending > 0
                 ? sprintf( 'Se actualizaron %1$d de %2$d indicadores. El resto se actualizará en segundo plano.', $result['updated'], $result['total'] )
-                : 'Caché limpia e indicadores actualizados.',
+                : 'Indicadores actualizados.',
         ] );
     }
 }
